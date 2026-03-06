@@ -1,0 +1,6 @@
+target/
+.idea/
+.vscode/
+.kotlin/
+*.class
+application-local.properties
