@@ -21,7 +21,7 @@ class UserController(private val userService: UserService) {
     fun register(
         @RequestBody request: RegisterRequest,
         @RequestHeader(value = "X-Trace-Id", required = false) traceId: String?
-    ): UserResponse {
+    ): LoginResponse {
         if (traceId != null) MDC.put("traceId", traceId)
         return try { userService.register(request) } finally { if (traceId != null) MDC.remove("traceId") }
     }
