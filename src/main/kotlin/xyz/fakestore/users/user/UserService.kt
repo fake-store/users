@@ -6,6 +6,7 @@ import xyz.fakestore.users.auth.JwtUtil
 import xyz.fakestore.users.dto.LoginRequest
 import xyz.fakestore.users.dto.LoginResponse
 import xyz.fakestore.users.dto.RegisterRequest
+import xyz.fakestore.users.dto.UpdateEmailRequest
 import xyz.fakestore.users.dto.UserResponse
 import java.util.UUID
 
@@ -44,6 +45,15 @@ class UserService(
 
     fun getById(userId: UUID): UserResponse {
         val user = userRepository.findById(userId).orElseThrow { NoSuchElementException("User not found") }
+        return UserResponse(userId = user.id, username = user.username, email = user.email)
+    }
+
+    fun updateEmail(userId: UUID, request: UpdateEmailRequest): UserResponse {
+        if (request.email.isBlank()) throw IllegalArgumentException("Email must not be blank")
+        if (userRepository.existsByEmail(request.email)) throw IllegalArgumentException("Email already in use")
+        val user = userRepository.findById(userId).orElseThrow { NoSuchElementException("User not found") }
+        user.email = request.email
+        userRepository.save(user)
         return UserResponse(userId = user.id, username = user.username, email = user.email)
     }
 }
