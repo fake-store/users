@@ -17,7 +17,7 @@ class UserService(
     private val jwtUtil: JwtUtil
 ) {
 
-    fun register(request: RegisterRequest): UserResponse {
+    fun register(request: RegisterRequest): LoginResponse {
         if (userRepository.existsByEmail(request.email))
             throw IllegalArgumentException("Email already in use")
         if (userRepository.existsByUsername(request.username))
@@ -30,7 +30,8 @@ class UserService(
                 passwordHash = passwordEncoder.encode(request.password)
             )
         )
-        return UserResponse(userId = user.id, username = user.username, email = user.email)
+        val token = jwtUtil.generateToken(user.id, user.email, user.username)
+        return LoginResponse(token = token, userId = user.id, username = user.username, email = user.email)
     }
 
     fun login(request: LoginRequest): LoginResponse {
