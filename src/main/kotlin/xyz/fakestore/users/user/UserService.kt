@@ -57,4 +57,12 @@ class UserService(
         userRepository.save(user)
         return UserResponse(userId = user.id, username = user.username, email = user.email)
     }
+
+    fun countUsers(): Long = userRepository.count()
+
+    fun deleteAllUsers(): Long {
+        val count = userRepository.count()
+        userRepository.deleteAll()
+        return count
+    }
 }
