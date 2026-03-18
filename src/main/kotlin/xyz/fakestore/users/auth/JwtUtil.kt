@@ -8,10 +8,12 @@ import java.util.Date
 import java.util.UUID
 
 @Component
-class JwtUtil(@Value("\${jwt.secret}") private val secret: String) {
-
+class JwtUtil(
+    @Value("\${jwt.secret}") private val secret: String,
+    @Value("\${jwt.expiration-minutes:1440}") private val expirationMinutes: Long
+) {
     private val key by lazy { Keys.hmacShaKeyFor(secret.toByteArray()) }
-    private val expirationMs = 24 * 60 * 60 * 1000L  // 24 hours
+    private val expirationMs get() = expirationMinutes * 60 * 1000L
 
     fun generateToken(userId: UUID, email: String, username: String): String =
         Jwts.builder()
