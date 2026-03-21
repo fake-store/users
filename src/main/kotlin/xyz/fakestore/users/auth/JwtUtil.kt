@@ -2,6 +2,7 @@ package xyz.fakestore.users.auth
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.util.Date
@@ -12,6 +13,7 @@ class JwtUtil(
     @Value("\${jwt.secret}") private val secret: String,
     @Value("\${jwt.expiration-minutes:1440}") private val expirationMinutes: Long
 ) {
+    private val log = LoggerFactory.getLogger(JwtUtil::class.java)
     private val key by lazy { Keys.hmacShaKeyFor(secret.toByteArray()) }
     private val expirationMs get() = expirationMinutes * 60 * 1000L
 
@@ -28,10 +30,10 @@ class JwtUtil(
     fun validateAndGetUserId(token: String): UUID? = runCatching {
         val claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).payload
         UUID.fromString(claims.subject)
-    }.getOrNull()
+    }.onFailure { log.warn("JWT validateAndGetUserId failed: {}", it.message) }.getOrNull()
 
     fun validateAndGetClaims(token: String): Map<String, Any>? = runCatching {
         Jwts.parser().verifyWith(key).build().parseSignedClaims(token).payload
             .let { mapOf("userId" to it.subject, "email" to it["email"]!!, "username" to it["username"]!!) }
-    }.getOrNull()
+    }.onFailure { log.warn("JWT validateAndGetClaims failed: {}", it.message) }.getOrNull()
 }

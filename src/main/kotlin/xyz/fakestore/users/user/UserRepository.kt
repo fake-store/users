@@ -5,6 +5,7 @@ import org.jooq.Record
 import org.jooq.impl.DSL.field
 import org.jooq.impl.DSL.table
 import org.springframework.stereotype.Repository
+import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -16,14 +17,14 @@ class UserRepository(private val dsl: DSLContext) {
     private val EMAIL = field("email", String::class.java)
     private val USERNAME = field("username", String::class.java)
     private val PASSWORD_HASH = field("password_hash", String::class.java)
-    private val CREATED_AT = field("created_at", LocalDateTime::class.java)
+    private val CREATED_AT = field("created_at", Timestamp::class.java)
 
     private fun Record.toUser() = User(
         id = get(ID),
         email = get(EMAIL),
         username = get(USERNAME),
         passwordHash = get(PASSWORD_HASH),
-        createdAt = get(CREATED_AT)
+        createdAt = get(CREATED_AT).toLocalDateTime()
     )
 
     fun findByEmail(email: String): User? =
@@ -44,7 +45,7 @@ class UserRepository(private val dsl: DSLContext) {
             .set(EMAIL, user.email)
             .set(USERNAME, user.username)
             .set(PASSWORD_HASH, user.passwordHash)
-            .set(CREATED_AT, user.createdAt)
+            .set(CREATED_AT, Timestamp.valueOf(user.createdAt))
             .execute()
         return user
     }
@@ -55,6 +56,9 @@ class UserRepository(private val dsl: DSLContext) {
             .where(ID.eq(id))
             .execute()
     }
+
+    fun findAll(): List<User> =
+        dsl.select().from(USERS).orderBy(CREATED_AT.asc()).fetch { it.toUser() }
 
     fun count(): Long = dsl.fetchCount(USERS).toLong()
 

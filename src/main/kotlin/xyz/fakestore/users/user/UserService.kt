@@ -60,6 +60,9 @@ class UserService(
         return UserResponse(userId = user.id, username = user.username, email = request.email)
     }
 
+    fun getAllUsers(): List<UserResponse> =
+        userRepository.findAll().map { UserResponse(userId = it.id, username = it.username, email = it.email) }
+
     fun countUsers(): Long = userRepository.count()
 
     fun deleteAllUsers(): Long = userRepository.deleteAll()
