@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.3</version>
+        <version>3.4.13</version>
         <relativePath/>
     </parent>
 
@@ -18,7 +18,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>2.1.10</kotlin.version>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
     </properties>
 
     <build>
@@ -65,6 +65,12 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <jvmArguments>
+                        -Dspring.flyway.enabled=false
+                        -Dspring.datasource.hikari.initialization-fail-timeout=-1
+                    </jvmArguments>
+                </configuration>
             </plugin>
         </plugins>
     </build>
