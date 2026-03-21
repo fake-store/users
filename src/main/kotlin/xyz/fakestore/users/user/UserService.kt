@@ -8,6 +8,7 @@ import xyz.fakestore.users.dto.LoginResponse
 import xyz.fakestore.users.dto.RegisterRequest
 import xyz.fakestore.users.dto.UpdateEmailRequest
 import xyz.fakestore.users.dto.UserResponse
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -23,11 +24,13 @@ class UserService(
         if (userRepository.existsByUsername(request.username))
             throw IllegalArgumentException("Username already taken")
 
-        val user = userRepository.save(
+        val user = userRepository.insert(
             User(
+                id = UUID.randomUUID(),
                 email = request.email,
                 username = request.username,
-                passwordHash = passwordEncoder.encode(request.password)
+                passwordHash = passwordEncoder.encode(request.password),
+                createdAt = LocalDateTime.now()
             )
         )
         val token = jwtUtil.generateToken(user.id, user.email, user.username)
@@ -45,24 +48,19 @@ class UserService(
     }
 
     fun getById(userId: UUID): UserResponse {
-        val user = userRepository.findById(userId).orElseThrow { NoSuchElementException("User not found") }
+        val user = userRepository.findById(userId) ?: throw NoSuchElementException("User not found")
         return UserResponse(userId = user.id, username = user.username, email = user.email)
     }
 
     fun updateEmail(userId: UUID, request: UpdateEmailRequest): UserResponse {
         if (request.email.isBlank()) throw IllegalArgumentException("Email must not be blank")
         if (userRepository.existsByEmail(request.email)) throw IllegalArgumentException("Email already in use")
-        val user = userRepository.findById(userId).orElseThrow { NoSuchElementException("User not found") }
-        user.email = request.email
-        userRepository.save(user)
-        return UserResponse(userId = user.id, username = user.username, email = user.email)
+        val user = userRepository.findById(userId) ?: throw NoSuchElementException("User not found")
+        userRepository.updateEmail(userId, request.email)
+        return UserResponse(userId = user.id, username = user.username, email = request.email)
     }
 
     fun countUsers(): Long = userRepository.count()
 
-    fun deleteAllUsers(): Long {
-        val count = userRepository.count()
-        userRepository.deleteAll()
-        return count
-    }
+    fun deleteAllUsers(): Long = userRepository.deleteAll()
 }

@@ -1,23 +1,12 @@
 package xyz.fakestore.users.user
 
-import jakarta.persistence.*
-import java.time.Instant
+import java.time.LocalDateTime
 import java.util.UUID
 
-@Entity
-@Table(name = "users")
-class User(
-    @Id
-    val id: UUID = UUID.randomUUID(),
-
-    @Column(unique = true, nullable = false)
-    var email: String,
-
-    @Column(unique = true, nullable = false)
+data class User(
+    val id: UUID,
+    val email: String,
     val username: String,
-
-    @Column(nullable = false)
-    var passwordHash: String,
-
-    val createdAt: Instant = Instant.now()
+    val passwordHash: String,
+    val createdAt: LocalDateTime
 )
